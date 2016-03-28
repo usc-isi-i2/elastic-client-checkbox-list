@@ -12,7 +12,7 @@
   ],
   "main": "elastic-client-checkbox-list.html",
   "license": "http://polymer.github.io/LICENSE.txt",
-  "homepage": "https://github.com/DigElements/elastic-client-search/",
+  "homepage": "https://github.com/DigElements/elastic-client-checkbox-list/",
   "ignore": [
     "/.*",
     "/test/"
