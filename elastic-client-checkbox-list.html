@@ -1,0 +1,98 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../paper-checkbox/paper-checkbox.html">
+<link rel="import" href="./elasticjs.html">
+<link rel="import" href="./lodash.html">
+
+<!--
+Doc
+
+Example:
+
+        <elastic-client-checkbox-list></elastic-client-checkbox-list>
+
+@demo demo/index.html
+-->
+
+<dom-module id="elastic-client-checkbox-list">
+    <template>
+        <template is="dom-repeat" items="{{facets}}" as="facet">
+            <paper-checkbox
+                name="[[facet.key]]",
+                checked="{{facet.enabled}}"
+            >{{facet.key}} ({{facet.count}})</paper-checkbox>
+        </template>
+
+    </template>
+
+    <script>
+        (function() {
+            Polymer({
+                is: 'elastic-client-checkbox-list',
+
+                properties: {
+                    buckets: {
+                        type: Array
+                    },
+
+                    facets: {
+                        type: Array,
+                        computed: 'extractFacets(buckets)',
+                        notify: true
+                    },
+
+                    field: {
+                        type: String
+                    },
+
+                    //'and' or 'or'
+                    combinationType: {
+                        type: String
+                    },
+
+                    ejsFilter: {
+                        type: Object,
+                        notify: true,
+                        readOnly: true
+                    }
+                },
+
+                observers: [
+                    'buildFilter(facets.*, combinationType, field)'
+                ],
+
+                buildFilter: function() {
+                    var me = this;
+                    var filters = [];
+
+                    _.each(this.facets, function(facet) {
+                        if(facet.enabled) {
+                            filters.push(ejs.TermFilter(me.field, facet.key));
+                        }
+                    })
+
+                    if(filters.length > 0) {
+                        if(this.combinationType === 'and') {
+                            this._setEjsFilter(ejs.AndFilter(filters));
+                        } else {
+                            this._setEjsFilter(ejs.OrFilter(filters));
+                        }
+                    } else {
+                        this._setEjsFilter(undefined);
+                    }
+                },
+
+                extractFacets: function(buckets) {
+                    var facets = [];
+                    _.each(buckets, function(bucket) {
+                        facets.push({
+                            key: bucket.key,
+                            count: bucket.doc_count,
+                            enabled: false
+                        });
+                    });
+                    return facets;
+                }
+            });
+        })();
+    </script>
+</dom-module>
