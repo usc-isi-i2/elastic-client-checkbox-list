@@ -40,6 +40,12 @@ Example:
                         notify: true
                     },
 
+                    facetSelection: {
+                        type: Object,
+                        readOnly: true,
+                        value: {}
+                    },
+
                     field: {
                         type: String
                     },
@@ -63,12 +69,23 @@ Example:
                 buildFilter: function() {
                     var me = this;
                     var filters = [];
+                    var change;
 
                     _.each(this.facets, function(facet) {
+                        if(me.facetSelection[facet.key] !== facet.enabled) {
+                            change = true;
+                            me.facetSelection[facet.key] = facet.enabled;
+                        }
+
                         if(facet.enabled) {
                             filters.push(ejs.TermFilter(me.field, facet.key));
                         }
                     })
+
+                    if(!change) {
+                        console.log("No Change");
+                        return
+                    }
 
                     if(filters.length > 0) {
                         if(this.combinationType === 'and') {
@@ -82,12 +99,13 @@ Example:
                 },
 
                 extractFacets: function(buckets) {
+                    var me = this;
                     var facets = [];
                     _.each(buckets, function(bucket) {
                         facets.push({
                             key: bucket.key,
                             count: bucket.doc_count,
-                            enabled: false
+                            enabled: me.facetSelection[bucket.key]
                         });
                     });
                     return facets;
