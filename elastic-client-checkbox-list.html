@@ -4,21 +4,45 @@
 <link rel="import" href="./lodash.html">
 
 <!--
-Doc
+An element which renders a list of checkboxes based on an elasticsearch aggregation
+bucket list, allowing for the selection of each. Selection is returned as an
+elasticjs AND or OR filter based on the value of combinationType
 
 Example:
 
-        <elastic-client-checkbox-list></elastic-client-checkbox-list>
+        <elastic-client-checkbox-list
+            buckets: "{{bucketsList}}"
+            field: "myfield"
+            combination-type: "or"
+            ejs-filter: "{{filterResult}}"
+        >
+        </elastic-client-checkbox-list>
+
+Example:
+
+        <elastic-client-checkbox-list
+            buckets: "{{bucketsList}}"
+            field: "myfield2"
+            combination-type: "and"
+            ejs-filter: "{{filterResult}}"
+        >
+        </elastic-client-checkbox-list>
 
 @demo demo/index.html
 -->
 
 <dom-module id="elastic-client-checkbox-list">
+    <style>
+        .block {
+            display: block;
+        }
+    </style>
     <template>
         <template is="dom-repeat" items="{{facets}}" as="facet">
             <paper-checkbox
-                name="[[facet.key]]",
+                name="[[facet.key]]"
                 checked="{{facet.enabled}}"
+                class="block"
             >{{facet.key}} ({{facet.count}})</paper-checkbox>
         </template>
 
@@ -30,31 +54,52 @@ Example:
                 is: 'elastic-client-checkbox-list',
 
                 properties: {
+                    /**
+                     * the list of buckets from an elastic search
+                     * aggregation result
+                    */
                     buckets: {
                         type: Array
                     },
 
+                    /**
+                     * Computed list of facet buckets used for displaying
+                     * checkboxes
+                    */
                     facets: {
                         type: Array,
                         computed: 'extractFacets(buckets)',
                         notify: true
                     },
 
+                    /**
+                     * Contains state of facet checkboxes to persist
+                     * selection state between queries.
+                    */
                     facetSelection: {
                         type: Object,
                         readOnly: true,
                         value: {}
                     },
 
+                    /**
+                     * The field which the resulting filters should be targetting
+                    */
                     field: {
                         type: String
                     },
 
-                    //'and' or 'or'
+                    /**
+                     * Whether checkboxes should result in an AND filter or an
+                     * OR filter
+                    */
                     combinationType: {
                         type: String
                     },
 
+                    /**
+                     * The resulting elasticjs filter
+                    */
                     ejsFilter: {
                         type: Object,
                         notify: true,
@@ -66,6 +111,9 @@ Example:
                     'buildFilter(facets.*, combinationType, field)'
                 ],
 
+                /**
+                 * Builds the ejsFilter based on the facets selection state
+                */
                 buildFilter: function() {
                     var me = this;
                     var filters = [];
@@ -98,6 +146,10 @@ Example:
                     }
                 },
 
+                /**
+                 * Builds the state of the facet checkboxes based on the inputted
+                 * buckets list and the saved state of selections
+                */
                 extractFacets: function(buckets) {
                     var me = this;
                     var facets = [];
