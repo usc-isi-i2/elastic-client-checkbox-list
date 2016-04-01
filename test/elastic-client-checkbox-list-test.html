@@ -1,0 +1,159 @@
+<!doctype html>
+
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+
+        <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+        <script src="../../web-component-tester/browser.js"></script>
+
+        <!-- Import the element to test -->
+        <link rel="import" href="../elastic-client-checkbox-list.html">
+    </head>
+    <body>
+        <!-- Use the document as a place to set up your fixtures. -->
+        <test-fixture id="elastic-client-checkbox-list-fixture">
+            <template>
+                <elastic-client-checkbox-list
+                    combination-type="or"
+                    field="testField"
+                >
+                </elastic-client-checkbox-list>
+            </template>
+        </test-fixture>
+
+        <test-fixture id="elastic-client-checkbox-list-fixture2">
+            <template>
+                <elastic-client-checkbox-list
+                    combination-type="and"
+                    field="testField"
+                >
+                </elastic-client-checkbox-list>
+            </template>
+        </test-fixture>
+
+        <script>
+            suite('<elastic-client-checkbox-list>', function() {
+
+                var eccl;
+
+                setup(function(done) {
+                    eccl = fixture('elastic-client-checkbox-list-fixture');
+                    eccl.buckets = [{
+                        key: 'foo',
+                        doc_count: 15
+                    },{
+                        key: 'bar',
+                        doc_count: 20
+                    },{
+                        key: 'baz',
+                        doc_count: 25
+                    }];
+
+                    flush(done);
+                });
+
+                test('field is set', function() {
+                    expect(eccl.field).to.equal('testField');
+                });
+
+                test('combination type is set', function() {
+                    expect(eccl.combinationType).to.equal('or');
+                });
+
+                test('builds or filter on checked box', function(done) {
+                    var checkbox = document.querySelector("paper-checkbox").querySelector(":scope #checkbox");
+                    expect(eccl.ejsFilter).to.not.exist;
+
+                    checkbox.click();
+
+                    expect(eccl.ejsFilter).to.exist;
+                    expect(eccl.ejsFilter.toJSON()).to.deep.equal(ejs.OrFilter(ejs.TermFilter('testField', 'foo')).toJSON());
+
+                    checkbox.click();
+                    done();
+                });
+
+                test('builds and filter on checked box', function(done) {
+                    eccl.combinationType = "and";
+                    flush();
+
+                    var checkbox = document.querySelector("paper-checkbox").querySelector(":scope #checkbox");
+                    expect(eccl.ejsFilter).to.not.exist;
+
+                    checkbox.click();
+
+                    expect(eccl.ejsFilter).to.exist;
+                    expect(eccl.ejsFilter.toJSON()).to.deep.equal(ejs.AndFilter(ejs.TermFilter('testField', 'foo')).toJSON());
+
+                    checkbox.click();
+                    done();
+                });
+
+                test('clears filter on all checked boxes unchecked', function(done) {
+                    var checkbox = document.querySelector("paper-checkbox").querySelector(":scope #checkbox");
+                    expect(eccl.ejsFilter).to.not.exist;
+
+                    checkbox.click();
+
+                    expect(eccl.ejsFilter).to.exist;
+
+                    checkbox.click();
+
+                    expect(eccl.ejsFilter).not.to.exist;
+                    done();
+                });
+
+                test('maintains checked state on bucket change', function(done) {
+                    var checkbox = document.querySelector("paper-checkbox").querySelector(":scope #checkbox");
+                    expect(eccl.ejsFilter).to.not.exist;
+
+                    expect(eccl.facets).to.exist;
+                    expect(eccl.facets.length).to.equal(3);
+                    expect(eccl.facets[0].enabled).to.equal(false);
+                    expect(eccl.facets[1].enabled).not.to.exist;
+                    expect(eccl.facets[2].enabled).not.to.exist;
+
+                    checkbox.click();
+
+                    expect(eccl.facets).to.exist;
+                    expect(eccl.facets.length).to.equal(3);
+                    expect(eccl.facets[0].enabled).to.equal(true);
+                    expect(eccl.facets[1].enabled).not.to.exist;
+                    expect(eccl.facets[2].enabled).not.to.exist;
+
+                    eccl.buckets = [{
+                        key: 'foo',
+                        doc_count: 15
+                    },{
+                        key: 'baz',
+                        doc_count: 25
+                    }];
+                    flush();
+
+                    expect(eccl.facets).to.exist;
+                    expect(eccl.facets.length).to.equal(2);
+                    expect(eccl.facets[0].enabled).to.equal(true);
+                    expect(eccl.facets[1].enabled).not.to.exist;
+
+                    eccl.buckets = [{
+                        key: 'baz',
+                        doc_count: 25
+                    },{
+                        key: 'foo',
+                        doc_count: 15
+                    }];
+                    flush();
+
+                    expect(eccl.facets).to.exist;
+                    expect(eccl.facets.length).to.equal(2);
+                    expect(eccl.facets[0].enabled).not.to.exist;
+                    expect(eccl.facets[1].enabled).to.equal(true);
+
+                    done();
+                });
+            });
+        </script>
+    </body>
+</html>

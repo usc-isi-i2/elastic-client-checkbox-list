@@ -9,40 +9,55 @@ Code distributed by Google as part of the polymer project is also
 subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
 <html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
-    <title>elastic-client-checkbox-list Demo</title>
-    <script src="../../webcomponentsjs/webcomponents-lite.min.js"></script>
-    <link rel="import" href="../elastic-client-checkbox-list.html">
-  </head>
-  <body unresolved>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+        <title>elastic-client-checkbox-list Demo</title>
+        <script src="../../webcomponentsjs/webcomponents-lite.min.js"></script>
+        <link rel="import" href="../elastic-client-checkbox-list.html">
+    </head>
+    <body unresolved>
+        <template is="dom-bind" id="demo">
+            <elastic-client-checkbox-list
+                buckets="{{getBuckets()}}"
+                combination-type="or"
+                field="myField"
+                ejs-filter="{{filter}}"
+            >
+            </elastic-client-checkbox-list>
 
-    <p>An example of <code>&lt;elastic-client-checkbox-list&gt;</code>:</p>
+            <p>EJS Filter</p>
+            <p>{{toJSON(filter)}}</p>
+            <p>Buckets</p>
+            <p>{{getBucketsAsJSON()}}</p>
+        </template>
 
-    <p>Make words! <button id="saybtn">Say Something</button></p>
-    <p>Make lasers! <button id="laserbtn">Fire lasers</button></p>
+        <script>
+            (function(document) {
+                var demo = document.querySelector('#demo');
 
-    <elastic-client-checkbox-list author='{"name": "Lord Meowser", "image": "http://lorempixel.com/g/300/200/cats/"}' fancy>
-      <h2>Hello elastic-client-checkbox-list</h2>
-    </elastic-client-checkbox-list>
+                demo.toJSON = function(ejs) {
+                    return JSON.stringify(ejs);
+                };
 
-    <script>
-      var seedElement = document.querySelector('elastic-client-checkbox-list');
+                demo.getBuckets = function() {
+                    return [{
+                        key: 'foo',
+                        doc_count: 15
+                    },{
+                        key: 'bar',
+                        doc_count: 20
+                    },{
+                        key: 'baz',
+                        doc_count: 25
+                    }]
+                };
 
-      document.querySelector('#saybtn').addEventListener('click', function() {
-        alert(seedElement.sayHello('Hallo!'));
-      });
-
-      document.querySelector('#laserbtn').addEventListener('click', function() {
-        seedElement.fireLasers();
-      });
-
-      document.addEventListener("elastic-client-checkbox-list-lasers", function(e) {
-        console.log(e.detail.sound);
-      });
-
-    </script>
-
-  </body>
+                demo.getBucketsAsJSON = function() {
+                    return this.toJSON(this.getBuckets());
+                };
+            })(document);
+        </script>
+        </script>
+    </body>
 </html>
