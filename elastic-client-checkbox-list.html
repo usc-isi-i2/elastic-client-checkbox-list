@@ -68,7 +68,7 @@ Example:
                     */
                     facets: {
                         type: Array,
-                        computed: 'extractFacets(buckets)',
+                        computed: 'extractFacets(buckets.*)',
                         notify: true
                     },
 
@@ -103,7 +103,8 @@ Example:
                     ejsFilter: {
                         type: Object,
                         notify: true,
-                        readOnly: true
+                        readOnly: true,
+                        value: ejs.MatchAllFilter()
                     }
                 },
 
@@ -142,7 +143,7 @@ Example:
                             this._setEjsFilter(ejs.OrFilter(filters));
                         }
                     } else {
-                        this._setEjsFilter(undefined);
+                        this._setEjsFilter(ejs.MatchAllFilter());
                     }
                 },
 
@@ -152,15 +153,30 @@ Example:
                 */
                 extractFacets: function(buckets) {
                     var me = this;
-                    var facets = [];
-                    _.each(buckets, function(bucket) {
-                        facets.push({
+                    var facets = {};
+                    var facetsList = [];
+                    _.each(buckets.value, function(bucket) {
+                        facets[bucket.key] = {
                             key: bucket.key,
                             count: bucket.doc_count,
                             enabled: me.facetSelection[bucket.key]
-                        });
+                        };
+
+                        facetsList.push(facets[bucket.key]);
                     });
-                    return facets;
+
+                    _.each(me.facetSelection, function(selected, key) {
+                        if(selected && !facets[key]) {
+                            facets[key] = {
+                                key: key,
+                                count: 0,
+                                enabled: selected
+                            };
+                            facetsList.splice(0,0,facets[key]);
+                        }
+                    })
+
+                    return facetsList;
                 }
             });
         })();
