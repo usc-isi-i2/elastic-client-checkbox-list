@@ -78,7 +78,9 @@ Example:
                     */
                     facetSelection: {
                         type: Object,
-                        value: {}
+                        value: function() {
+                            return {}
+                        }
                     },
 
                     /**
@@ -175,16 +177,16 @@ Example:
                         facetsList.push(facets[bucket.key]);
                     });
 
-                    // _.each(me.facetSelection, function(selected, key) {
-                    //     if(selected && !facets[key]) {
-                    //         facets[key] = {
-                    //             key: key,
-                    //             count: 0,
-                    //             enabled: selected
-                    //         };
-                    //         facetsList.splice(0,0,facets[key]);
-                    //     }
-                    // })
+                    _.each(me.facetSelection, function(selected, key) {
+                        if(selected && !facets[key]) {
+                            facets[key] = {
+                                key: key,
+                                count: 0,
+                                enabled: selected
+                            };
+                            facetsList.splice(0,0,facets[key]);
+                        }
+                    })
 
                     return facetsList;
                 }
