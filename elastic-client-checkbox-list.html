@@ -126,9 +126,12 @@ Example:
                     var change;
 
                     _.each(this.facets, function(facet) {
-                        if(me.facetSelection[facet.key] !== facet.enabled) {
+                        selected = false
+                        if(me.facetSelection[facet.key])
+                            selected = me.facetSelection[facet.key].enabled
+                        if(selected !== facet.enabled) {
                             change = true;
-                            me.facetSelection[facet.key] = facet.enabled;
+                            me.facetSelection[facet.key] = facet;
                         }
 
                         if(facet.enabled) {
@@ -172,15 +175,17 @@ Example:
                             text: (bucket.text)? bucket.text : bucket.key,
                             key: bucket.key,
                             count: bucket.doc_count,
-                            enabled: (me.facetSelection[bucket.key] ? me.facetSelection[bucket.key] : false)
+                            enabled: (me.facetSelection[bucket.key] ? me.facetSelection[bucket.key].enabled : false)
                         };
 
                         facetsList.push(facets[bucket.key]);
                     });
 
-                    _.each(me.facetSelection, function(selected, key) {
+                    _.each(me.facetSelection, function(value, key) {
+                        selected = value.enabled;
                         if(selected && !facets[key]) {
                             facets[key] = {
+                                text: value['text'],
                                 key: key,
                                 count: 0,
                                 enabled: selected
