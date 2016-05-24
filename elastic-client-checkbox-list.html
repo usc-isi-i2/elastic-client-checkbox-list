@@ -79,7 +79,7 @@ Example:
                     facetSelection: {
                         type: Object,
                         value: function() {
-                            return {}
+                            return {};
                         }
                     },
 
@@ -134,11 +134,11 @@ Example:
                         if(facet.enabled) {
                             filters.push(ejs.TermFilter(me.field, facet.key));
                         }
-                    })
+                    });
 
                     if(!change) {
                         console.log("No Change");
-                        return
+                        return;
                     }
 
                     var filter;
@@ -186,7 +186,7 @@ Example:
                             };
                             facetsList.splice(0,0,facets[key]);
                         }
-                    })
+                    });
 
                     return facetsList;
                 }
