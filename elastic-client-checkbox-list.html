@@ -43,7 +43,7 @@ Example:
                 name="[[facet.key]]"
                 checked="{{facet.enabled}}"
                 class="block"
-            >{{facet.key}} ({{facet.count}})</paper-checkbox>
+            >{{facet.text}} ({{facet.count}})</paper-checkbox>
         </template>
 
     </template>
@@ -169,6 +169,7 @@ Example:
                     var facetsList = [];
                     _.each(buckets.value, function(bucket) {
                         facets[bucket.key] = {
+                            text: (bucket.text)? bucket.text : bucket.key,
                             key: bucket.key,
                             count: bucket.doc_count,
                             enabled: (me.facetSelection[bucket.key] ? me.facetSelection[bucket.key] : false)
