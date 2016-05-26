@@ -142,7 +142,7 @@ Example:
                     if(!change) {
                         console.log("No Change");
                         return;
-                    }
+                    } 
 
                     var filter;
                     if(filters.length > 0) {
@@ -151,12 +151,11 @@ Example:
                         } else {
                             filter = ejs.OrFilter(filters);
                         }
+                        if(this.filterName) {
+                            filter.name(this.filterName);
+                        }
                     } else {
                         filter = ejs.MatchAllFilter();
-                    }
-
-                    if(this.filterName) {
-                        filter.name(this.filterName);
                     }
 
                     this._setEjsFilter(filter);
