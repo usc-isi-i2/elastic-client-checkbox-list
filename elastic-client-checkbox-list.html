@@ -129,9 +129,15 @@ Example:
                         selected = false
                         if(me.facetSelection[facet.key])
                             selected = me.facetSelection[facet.key].enabled
+                       
                         if(selected !== facet.enabled) {
                             change = true;
-                            me.facetSelection[facet.key] = facet;
+                            me.facetSelection[facet.key] = {
+                                    text: facet.text,
+                                    key: facet.key,
+                                    count: facet.count,
+                                    enabled: facet.enabled
+                                };
                         }
 
                         if(facet.enabled) {
